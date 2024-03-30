@@ -67,6 +67,7 @@ DEFAULT_REQUEST_HEADERS = {
 DOWNLOADER_MIDDLEWARES = {
    "dishonest.middlewares.ProxyMiddleware": 500,
    "dishonest.middlewares.RandomUserAgent": 543,
+   'dishonest_list.middlewares.GsxtMiddleware': 10,
 }
 # 配置代理重制次数
 RETRY_TIMES = 5

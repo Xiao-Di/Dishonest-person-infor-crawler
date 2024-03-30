@@ -10,6 +10,7 @@ import pymysql
 from datetime import datetime
 
 from dishonest.settings import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, MYSQL_PORT
+from dishonest.spiders.gsxt import GsxtSpider
 
 """
 在open_spider中, 建立数据库连接, 获取操作的数据的cursor
@@ -51,6 +52,15 @@ class DishonestPipeline:
             # 修改身份证号, 为百度的格式, 方便后续的数据去重 和 保护失信人隐私.
             item['card_num'] = card_num
 
+        # 根据国家信息公示系统，增加区域和地区查询条件
+        if isinstance(spider, GsxtSpider):
+            # 由于在`国家企业信用公布系统`的公告信息中, 没有企业代码或信用号, 所以在这里采用地区加企业名称的方式查询
+            name = item['name']
+            area_name = item['area_name']
+            select_sql = "select count(1) from dishonest where name='{}' and area_name='{}'".format(name, area_name)
+        else:
+            # 根据证件号, 数据条数
+            select_sql = "select count(1) from dishonest where card_num='{}'".format(item['card_num'] )
         # 去重
         # 如果查询的数量为0, 说明该人不存在, 不存在就插入
         if count == 0:
